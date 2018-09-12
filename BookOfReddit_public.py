@@ -1,4 +1,9 @@
-# YOU NEED TO REPLACE CLIENT ID AND SECRET BELOW, OR ELSE IT WILL NOT WORK
+# write_file = open("write_example.txt",'w+')
+# write_file.write("START FILE")
+
+# write_file.close()
+
+# write_file = open("write_example.txt",'a+')
 
 import praw #Makes sure we can use the module
 
@@ -35,6 +40,18 @@ Enjoy, and happy reading!
 
 u/The_Removed,
 Creator of BookOfReddit
+
+NOTE: Due to the nature of
+the program used to create
+this, certain characters
+such as the interrobang
+(which is the '?' and '!'
+characters mixed together)
+have been replaced with
+appropriate counterparts.
+For example, the interro-
+bang would have been
+replaced with '?!'.
 --------------------------
 """
 
@@ -45,33 +62,30 @@ reddit = praw.Reddit(client_id='<YOUR CLIENT ID>',
 compendium = []
 link_list = []
 
-print("--- Welcome to Book of Reddit, enter a URL ---")
+print("--- Welcome to Book of Reddit, enter a file name ---")
+filename = input("Filename to save into (without extension): ")
+print("\n")
 print("(Use CTRL-C to exit or 'wipe' to wipe the file)")
-link = str(input("URL: "))
-link_list.append(link)
-submission = reddit.submission(url=link)
-compendium.append(submission)
-write_file = open(submission.title+".txt",'w+')
+write_file = open(filename+".txt",'w+')
 write_file.close()
-write_file = open(submission.title+".txt",'a+')
+write_file = open(filename+".txt",'a+')
 write_file.write(starttext)
-write_file.write("\n--- " + submission.title + " ---\n")
-write_file.write(submission.selftext)
 
 try:
 	while True:
-		link = str(input("URL: "))
-		if link=="wipe":
+		links = str(input("URLs (seperated by commas): ")).split(",")
+		if "wipe" in links:
 			f.truncate(0)
 			print("Wipe OK, links previously in file: " + link_list)
-		link_list.append(link)
-		submission = reddit.submission(url=link)
-		compendium.append(submission)
-		write_file.write("\n--- " + submission.title + " ---\n")
-		write_file.write(submission.selftext)
-		print("Write OK, CTRL-C to exit, 'wipe' to wipe file.\n")
+		for link in links:
+			link_list.append(link)
+			submission = reddit.submission(url=link)
+			compendium.append(submission)
+			write_file.write("\n--- " + submission.title + " ---\n")
+			write_file.write(submission.selftext.replace("‽", "?!"))
+			print("Processed: " + submission.title)
 except KeyboardInterrupt:
 	write_file.write("\n\n------ End Compendium, Metadata Below ------\n")
 	write_file.write("List of books in format ([TITLE], by [AUTHOR] in [SUBREDDIT]):\n")
 	for submission in compendium:
-		write_file.write('"' + submission.title+'", by ' + submission.author.name + " in " + str(submission.subreddit)+"\n")
+		write_file.write('> "' + submission.title+'", by u/' + submission.author.name + " in r/" + str(submission.subreddit)+"\n")
