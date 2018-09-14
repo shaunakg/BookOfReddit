@@ -1,13 +1,13 @@
-# write_file = open("write_example.txt",'w+')
-# write_file.write("START FILE")
-
-# write_file.close()
-
-# write_file = open("write_example.txt",'a+')
+# --- Welcome to BookOfReddit ---
+# This edition of BookOfReddit will (singularly) write reddit posts to a file 
+# only using Windows/Unix formatting. If you don't know what that means, you 
+# should use the BULK_CODECS file for general purposes.
 
 import praw #Makes sure we can use the module
 
 starttext = """\
+reddit post compendium made by BookOfReddit (https://git.io/fA2dt)
+options: bulk, UTF-8 ONLY
 --------------------------
 This is a compendium of
 Reddit posts compiled by

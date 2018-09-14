@@ -1,10 +1,11 @@
 # --- Welcome to BookOfReddit ---
 # This edition of BookOfReddit will (BULK) write reddit posts to a file 
-# only using Windows/UNIX formatting. If you don't know what that means, you 
-# should use the BULK-CODECS file for general purposes.
+# only using UTF-8 formatting. If you don't know what that means, you 
+# should use this file for general purposes.
 
 # YOU NEED TO REPLACE CLIENT ID AND SECRET BELOW, OR ELSE IT WILL NOT WORK
 
+import codecs
 import praw #Makes sure we can use the module
 import os
 
@@ -12,7 +13,7 @@ exists = os.path.exists
 
 starttext = """\
 reddit post compendium made by BookOfReddit (https://git.io/fA2dt)
-options: bulk, no UTF-8
+options: bulk, UTF-8 ONLY
 _________________________
 This is a compendium of
 Reddit posts compiled by
@@ -70,9 +71,9 @@ print(">>> Welcome to Book of Reddit_BULK, enter a file name <<<")
 filename = input("Filename to save into (without extension): ")
 print("\n")
 print("(Use CTRL-C to exit or 'wipe' to wipe the file)")
-write_file = open(filename+".txt",'w+')
+write_file = codecs.open(filename+".txt",'w+',"utf-8")
 write_file.close()
-write_file = open(filename+".txt",'a+')
+write_file = codecs.open(filename+".txt",'a+','utf-8')
 write_file.write(starttext)
 
 logfile = open("logfile-"+filename+".txt","a+")
@@ -91,7 +92,7 @@ import re
 lw("Imported re module to parse links")
 
 try:
-	url = open("urls.md","r+").read()
+	url = codecs.open("urls.md","r+").read()
 
 	lw("Found file urls.md, parsing now")
 
@@ -116,7 +117,7 @@ try:
 		lw(i)
 	lw("\nStarting Processing...")
 except:
-	urls = open("urls.txt","r+").read().split("\n")
+	urls = codecs.open("urls.txt","r+","utf-8").read().split("\n")
 	if len(urls) < 2:
 		urls = urls[1].split(",")
 
@@ -135,7 +136,7 @@ try:
 			compendium.append(submission)
 			try:
 				write_file.write("\n>>> " + submission.title + " <<<\n")
-				write_file.write(submission.selftext.replace("‽", "?!").encode('utf-8'))
+				write_file.write(submission.selftext) # .replace("‽", "?!")
 				print("Processed: " + submission.title)
 				lw("Processed: " + submission.title)
 			except UnicodeEncodeError:
