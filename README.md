@@ -15,5 +15,5 @@ Creates a compendium of Reddit posts, useful for long, series length WritingProm
 - **Uses UTF-8 formatting** (This file is recommended to all users)
 
 ## License
-** BookOfReddit and all sub-programs are under the GNU GPLv3 license. You can do anything with them except commercialise or develop closed-source versions.**  
+**BookOfReddit and all sub-programs are under the GNU GPLv3 license. You can do anything with them except commercialise or develop closed-source versions.**  
 *The files that BookOfReddit makes are consisting of Reddit posts. Please review the Reddit content policy for more information.*  
