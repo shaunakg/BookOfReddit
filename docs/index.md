@@ -2,6 +2,7 @@
 Creates a compendium of Reddit posts, useful for long, series length WritingPrompts. (Originally created for r/HFY)
 
 #### [Latest release](https://github.com/shaunakg/BookOfReddit/releases/latest)
+#### [Instruction guide](/howto.md)
 
 ## Information about different files
 ### [BookOfReddit_public.py](https://github.com/shaunakg/BookOfReddit/releases/download/Major/BookOfReddit_v020.py)
