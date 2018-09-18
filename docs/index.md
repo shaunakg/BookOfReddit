@@ -17,7 +17,8 @@ Creates a compendium of Reddit posts, useful for long, series length WritingProm
 - **Uses UTF-8 formatting** (This file is recommended to all users)
 
 ## License
-`BookOfReddit, including all git submodules are free software:
+```
+BookOfReddit, including all git submodules are free software:
 you can redistribute it and/or modify it under the terms of the 
 GNU General Public License as published by the Free Software Foundation, 
 either version 3 of the License, or (at your option) any later version.
@@ -28,7 +29,8 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.`
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+```
 
 *The files that BookOfReddit makes are consisting of Reddit posts. Please review the Reddit content policy for more information.*
 *Some files use Calibre by Kovid Goyal as a dependancy. Calibre is copyright (c) 2018 Kovid Goyal, see the [Calibre web page](https://calibre-ebook.com/) for more information*
