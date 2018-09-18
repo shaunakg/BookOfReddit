@@ -1,16 +1,18 @@
 # BookOfReddit
 Creates a compendium of Reddit posts, useful for long, series length WritingPrompts. (Originally created for r/HFY)
 
+### [Releases available here](https://github.com/shaunakg/BookOfReddit/releases/tag/Major)
+
 ## Information about different files
-### BookOfReddit_public.py
+### [BookOfReddit_public.py](https://github.com/shaunakg/BookOfReddit/releases/download/Major/BookOfReddit_v020.py)
 - Writes Reddit posts selftexts to a compendium (one at a time, you can seperate links via commas)
 - Does **NOT** use UTF-8 encoding (not recommended for ebook readers)
 
-### BookOfReddit_BULK_public.py
+### [BookOfReddit_BULK_public.py](https://github.com/shaunakg/BookOfReddit/releases/download/Major/BookOfReddit_Bulk_v020.py)
 - Bulk writes reddit post selftexts to a compendium (reading from urls.md or urls.txt)
 - Does **NOT** use UTF-8 encoding (not recommended for ebook readers)
 
-### BookOfReddit_BULK_CODECS_public.py
+### [BookOfReddit_BULK_CODECS_public.py](https://github.com/shaunakg/BookOfReddit/releases/download/Major/BookOfReddit_Bulk_CODECS_v020.py)
 - Bulk writes reddit post selftexts to a compendium (reading from urls.md or urls.txt)
 - **Uses UTF-8 formatting** (This file is recommended to all users)
 
