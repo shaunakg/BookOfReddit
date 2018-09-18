@@ -1,7 +1,7 @@
 # BookOfReddit
 Creates a compendium of Reddit posts, useful for long, series length WritingPrompts. (Originally created for r/HFY)
 
-### [Releases available here](https://github.com/shaunakg/BookOfReddit/releases/tag/Major)
+#### [Latest release](https://github.com/shaunakg/BookOfReddit/releases/latest)
 
 ## Information about different files
 ### [BookOfReddit_public.py](https://github.com/shaunakg/BookOfReddit/releases/download/Major/BookOfReddit_v020.py)
