@@ -1,3 +1,5 @@
+# Copied directly from https://www.reddit.com/r/HFY/wiki/ref/universes/jenkinsverse/chronological_reading_order, to see how urls.md should really be, view raw at https://github.com/shaunakg/BookOfReddit/raw/master/urls.md
+
 ***0:[The Kevin Jenkins Experience Part 1.1](http://www.reddit.com/r/HFY/comments/2ftcpy/)***
  
 ***0:[The Kevin Jenkins Experience Part 1.2](http://www.reddit.com/r/HFY/comments/2ftdrl/text_the_kevin_jenkins_experience_chapter_1_part/)***
