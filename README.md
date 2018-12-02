@@ -19,7 +19,7 @@ Creates a compendium of Reddit posts, useful for long, series length WritingProm
 - **NEW: Gives the option to download and extract URLs from Reddit posts! Extremely useful for wiki pages or index pages (example: [this](https://www.reddit.com/r/HFY/wiki/ref/universes/jenkinsverse/chronological_reading_order) or [this](https://www.reddit.com/r/Selben/comments/60r5ps/timeline_for_tfts_stories/))**
 - **Uses UTF-8 formatting** (This file is recommended to all users)
 
-## md_download_to_urls.py
+#### md_download_to_urls.py
 - **Downloads wikis and index pages from reddit into urls.md**
 - Required to download reddit wikis or index posts from the internet (doesn't use PRAW so it's standalone)
 - Split into a different file to reduce code clutter (don't get used to it though)
