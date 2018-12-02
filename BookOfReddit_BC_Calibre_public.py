@@ -85,9 +85,9 @@ Creator of BookOfReddit
 __________________________
 """
 
-reddit = praw.Reddit(client_id='YOUR-CLIENT-ID',
-                     client_secret='YOUR-CLIENT-SECRET', password='OPTIONAL-PASSWORD',
-                     user_agent='BookOfReddit_V4', username='OPTIONAL-USERNAME')
+reddit = praw.Reddit(client_id='CHANGE THIS',
+                     client_secret='CHANGE THIS', password='OPTIONAL',
+                     user_agent='BookOfReddit_V4', username='OPTIONAL')
 
 compendium = []
 link_list = []
@@ -163,6 +163,12 @@ try:
 			lw("Removed " + i + " from list, it is not a URL.")
 
 	lw("-END PARSING STAGE 3-\n")
+
+	lw("-Starting Parsing stage 4-")
+	for i in urls:
+		if not "redd" in i:
+			urls.remove(i)
+
 	lw("URLS TO PROCESS:")
 	for i in urls:
 		lw(i)
@@ -178,6 +184,7 @@ try:
 	links = urls
 	for link in links:
 		link_list.append(link)
+		# print("Trying : " + link)
 		try:
 			submission = reddit.submission(url=link)
 		except Exception as e:
@@ -190,7 +197,7 @@ try:
 			write_file.write("[Error information (submit this): " + str(e) + "]")
 		compendium.append(submission)
 		try:
-			write_file.write("\n#" + submission.title.replace("[","(").replace("]",")") + "\n") # Added the '#' instead of normal '>>> ??? <<<' because then Calibre will detect it as a chapter.
+			write_file.write("\n##" + submission.title.replace("[","(").replace("]",")") + "\n") # Added the '#' instead of normal '>>> ??? <<<' because then Calibre will detect it as a chapter.
 			write_file.write(submission.selftext) # .replace("‽", "?!") #
 			print("Processed: " + submission.title)
 			lw("Processed: " + submission.title)
@@ -198,18 +205,23 @@ try:
 			print("UnicodeEncodeError on " + str(submission.title))
 			lw("UnicodeEncodeError on " + str(submission.title) + ", at: " + link)
 			# Error writing block
-			write_file.write("\n>>> " + submission.title + " (ERROR) <<<\n")
+			write_file.write("\n## " + submission.title + " (ERROR) \n")
 			write_file.write("[There was an error parsing the content at " + link + ".]")
 			write_file.write("[Please submit an error report at https://git.io/fAoaw.]")
 			write_file.write("[Error information (submit this): " + str(e) + "]")
 		except Exception as e:
-			print(str(e))
-			lw("Exception while writing " + link + " to file: " + str(e))
-			# Error writing block
-			write_file.write("\n>>> " + submission.title + " (ERROR) <<<\n")
-			write_file.write("[There was an error parsing the content at " + link + ".]")
-			write_file.write("[Please submit an error report at https://git.io/fAoaw.]")
-			write_file.write("[Error information (submit this): " + str(e) + "]")
+			try:
+				print(str(e))
+				lw("Exception while writing " + link + " to file: " + str(e))
+				# Error writing block
+				write_file.write("\n>>> " + submission.title + " (ERROR) <<<\n")
+				write_file.write("[There was an error parsing the content at " + link + ".]")
+				write_file.write("[Please submit an error report at https://git.io/fAoaw.]")
+				write_file.write("[Error information (submit this): " + str(e) + "]")
+			except:
+				print(link + " : NOT A POST")
+				compendium.remove(submission)
+				pass
 
 	raise KeyboardInterrupt	# This probably violates a lot of coding conventions and maritime laws	
 except KeyboardInterrupt:
