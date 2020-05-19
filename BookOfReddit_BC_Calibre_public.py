@@ -19,31 +19,38 @@
 # are copyright (c) 2018 Kovid Goyal. Check the license for Calibre at
 # https://github.com/kovidgoyal/calibre for more information.
 
-# YOU NEED TO REPLACE CLIENT ID AND SECRET BELOW, OR ELSE IT WILL NOT WORK
+# COMMAND LINE USAGE
+# python bookofreddit.py (url) (file name without extension) (extension) [can download from web] 
 
-ConversionFunctionality = True # Switch to FALSE to not execute commands using CMD
-# If you switch to FALSE, Calibre conversion will not work, however the program
-# will not execute commands on the system
+import sys
 
-canDownloadFromWeb = False
+canDownloadFromWeb = True
+
+try:
+	ext = sys.argv[3]
+except IndexError:
+	ext = "cf_disabled"
+
+exts = ["pdf","azw3","epub","mobi","","cf_disabled"] # < Add more (TODO)
+
+if ext not in exts:
+	print(f"{ext} is not a valid extension. Disabling conversion.")
+	ext = "cf_disabled"
+
+from dotenv import load_dotenv
+load_dotenv(dotenv_path="config.env")
 
 import codecs
 import praw #Makes sure we can use the module
 
 try:
 	import md_download_to_urls
-	canDownloadFromWeb = True
 except Exception as e:
+	canDownloadFromWeb = False
 	print("!!! You need the file md_download_to_urls.py to enable the download of links from the web. Get it at: git.io/fA2dt (Note: BookOfReddit will still work, however it will only read from urls.md)\n")
 
 
-if ConversionFunctionality:
-	import os # For executing Calibre commands only, see above to disable
-else:
-	print("\nBookOfReddit has been started with conversion functionality disabled.")
-	print("This may be for security reasons, however, if you want to change it, go ")
-	print("to the source code and change ConversionFunctionality to False.\n")
-	print("While it is disabled, BookOfReddit cannot convert between file formats.\n")
+import os
 
 exists = os.path.exists
 
@@ -85,19 +92,23 @@ Creator of BookOfReddit
 __________________________
 """
 
-reddit = praw.Reddit(client_id='CHANGE THIS',
-                     client_secret='CHANGE THIS', password='OPTIONAL',
-                     user_agent='BookOfReddit_V4', username='OPTIONAL')
+reddit = praw.Reddit(client_id=os.getenv("reddit_client"),
+                     client_secret=os.getenv("reddit_secret"),
+                     user_agent=os.getenv("reddit_useragent"))
 
 compendium = []
 link_list = []
-exts = ["pdf","azw3","epub","mobi",""] # < Add more (TODO)
 
 print(">>> Welcome to Book of Reddit (CONVERTER/DOWNLOADER EDITION) <<<")
 
 if canDownloadFromWeb:
 	while True:
-		url_to_get = input("Enter a reddit URL to parse (or just <ENTER> to get existing urls.md): ")
+
+		try:
+			url_to_get = sys.argv[1] 
+		except IndexError:
+			url_to_get = input("Enter a reddit URL to parse (or just <ENTER> to get existing urls.md): ")
+		
 		if url_to_get == "":
 			break
 		elif "http" in url_to_get:
@@ -106,13 +117,10 @@ if canDownloadFromWeb:
 		else:
 			print("Enter a valid url (with \"http\") or press <ENTER>!")
 
-name = input("Filename to save into (without extension): ")
-
-ext = input("Enter a file extension to convert to (Calibre required for this part) or press ENTER:")
-while ext not in exts:
-	ext = input("!invalid extension, enter either pdf, azw3, epub or mobi\nEnter a file extension to convert to (Calibre required for this part) or press ENTER:")
-
-ext = "cf_disabled" if not ConversionFunctionality else ext
+try:
+	name = sys.argv[2]
+except IndexError:
+	name = input("Filename to save into (without extension): ")
 
 print("\n")
 print("(Use CTRL-C to exit or 'wipe' to wipe the file)")
@@ -223,7 +231,8 @@ try:
 				compendium.remove(submission)
 				pass
 
-	raise KeyboardInterrupt	# This probably violates a lot of coding conventions and maritime laws	
+	raise KeyboardInterrupt	# This probably violates a lot of coding conventions and maritime laws
+
 except KeyboardInterrupt:
 	ebook_desc = "This is a Reddit compendium created by a program called BookOfReddit. The program is available at https://git.io/fA2dt and is licensed under GNU GPLv3 or later. Check last part of book for more information."
 	write_file.write("\n\n>>> End Compendium (with " + str(len(links)) + " posts), Metadata Below <<<\n")
@@ -232,7 +241,7 @@ except KeyboardInterrupt:
 		write_file.write('> "' + submission.title+'", by u/' + submission.author.name + " in r/" + str(submission.subreddit)+"\n")
 		# ebook_desc = ebook_desc + ", " + submission.title
 	write_file.close()
-	if ext in exts: # Conversion and Metadata write code
+	if ext in exts and ext != "cf_disabled": # Conversion and Metadata write code
 		conversion_command = "ebook-convert " + '"' + filename + '"' + " " + '"' + name + '.'+ext+'"'
 		new_filename = name+"."+ext
 		os.system("echo off && cls")

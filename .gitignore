@@ -1,0 +1,10 @@
+
+*/*
+*.log
+*.txt
+*.opf
+*.env
+urls.md
+
+!docs/*
+!old/*
