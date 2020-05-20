@@ -25,14 +25,7 @@
 import sys
 import datetime
 
-if len(sys.argv)==1:
-	lw("no command line options specified on startup")
-	print("Running BOR with user input. If you want to run automated, use the following command next time:")
-	print("python bookofreddit.py (url) (file name without extension) [extension]")
-
 logfile = open("logs/" + str(datetime.datetime.now().timestamp())+"-logfile.log","a+")
-
-logfile.write("\n\n^^^ THE ABOVE IS CONSOLE GENERATED OUTPUT ^^^\n\n")
 logfile.write(f"\n>>> Start BOR Logfile at {datetime.datetime.now()} <<<\n")
 
 def lw(writetext, printAlso=False):
@@ -40,6 +33,11 @@ def lw(writetext, printAlso=False):
 	if printAlso:
 		print(writetext)
 	return(f"[{str(datetime.datetime.now())}] {writetext}\n")
+
+if len(sys.argv)==1:
+	lw("no command line options specified on startup")
+	print("\nRunning BOR with user input. If you want to run automated, use the following command next time:")
+	print("$ python bookofreddit.py (url) (file name without extension) [extension]\n")
 
 canDownloadFromWeb = True
 
@@ -53,7 +51,7 @@ except IndexError:
 exts = ["pdf","azw3","epub","mobi","","cf_disabled"] # < Add more (TODO)
 
 if ext not in exts:
-	lw(f"{sys.argv[3]} wasn't a valid extension. disabling conversion.")
+	lw(f"{ext} wasn't a valid extension. disabling conversion.")
 	print(f"{ext} is not a valid extension. Disabling conversion.")
 	ext = "cf_disabled"
 
@@ -66,7 +64,7 @@ except:
 	exit(lw("fatal: unable to load environment file. exiting."))
 
 import codecs
-import praw # Only use praw if we're using the web.
+import praw # Use praw
 
 try:
 	from modules import md_download_to_urls
@@ -77,9 +75,13 @@ except Exception as e:
 	print("!!! You need the file md_download_to_urls.py to enable the download of links from the web. Get it at: git.io/fA2dt (note: BOR will still work, it will just use urls.md/txt)\n")
 
 import subprocess
+import platform
 import os
-
 exists = os.path.exists
+
+if os.name != 'nt':
+	lw(f"User is running {platform.platform()}, not Windows/NT.")
+	print("You are running a non-windows system. Some conversion commands may not work.")
 
 starttext = """\
 reddit post compendium made by BookOfReddit (https://git.io/fA2dt)
@@ -101,9 +103,7 @@ available at:
 https://git.io/fA2dt
 
 It is made and maintained
-by @shaunakg on Github
-and u/The_Removed on
-Reddit.
+by @shaunakg on Github.
 
 I cannot guarantee great
 formatting as Reddit is
@@ -114,7 +114,7 @@ posts.
 
 Enjoy, and happy reading!
 
-u/The_Removed,
+@shaunakg,
 Creator of BookOfReddit
 __________________________
 """
@@ -135,20 +135,27 @@ if canDownloadFromWeb:
 	while True:
 
 		try:
+
 			url_to_get = sys.argv[1] 
 			lw("cmd argument for reddit url: " + sys.argv[1])
+
 		except IndexError:
+
 			lw("no cmd argument. querying using input()")
 			url_to_get = input("Enter a reddit URL to parse (or just <ENTER> to get existing urls.md): ")
 			lw(f"user entered {url_to_get}")
 		
 		if url_to_get == "":
+
 			lw("user did not enter a string.")
 			break
+
 		elif "http" in url_to_get:
+
 			lw("downloading urls...")
-			md_download_to_urls.get(url_to_get)
+			md_download_to_urls.get(url_to_get, lw)
 			break
+
 		else:
 			lw("user did not enter a valid URL")
 			print("Enter a valid url (with \"http\") or press <ENTER>!")
@@ -163,7 +170,7 @@ except IndexError:
 
 print("\n")
 print("(Use CTRL-C to exit or 'wipe' to wipe the file)")
-filename = "outputs/" + name+".txt"
+filename = "outputs/" + name+".md"
 lw("Full output path: " + filename)
 
 try:
@@ -219,8 +226,8 @@ except:
 	if len(urls) < 2:
 		urls = urls[1].split(",")
 
-write_file.write("\n#Compendium by BookOfReddit (https://git.io/fA2dt), " + str(len(urls)) + " posts included\n")
-write_file.write(f"[original url link]({url_to_get})\n\n")
+write_file.write("\n**Compendium by BookOfReddit (https://git.io/fA2dt), " + str(len(urls)) + " posts included**\n")
+write_file.write(f"[original url link]({url_to_get})\n[ebook generation feedback](https://git.io/fAoaw)\n\n")
 
 try:
 	links = urls
@@ -245,13 +252,14 @@ try:
 			print("Processed: " + submission.title)
 			lw("Processed: " + submission.title)
 		except UnicodeEncodeError:
-			print("UnicodeEncodeError on " + str(submission.title))
-			lw("UnicodeEncodeError on " + str(submission.title) + ", at: " + link)
+
+			print(lw("UnicodeEncodeError on " + str(submission.title) + ", at: " + link))
 			# Error writing block
 			write_file.write("\n## " + submission.title + " (ERROR) \n")
 			write_file.write("[There was an error parsing the content at " + link + ".]")
 			write_file.write("[Please submit an error report at https://git.io/fAoaw.]")
 			write_file.write("[Error information (submit this): " + str(e) + "]")
+
 		except Exception as e:
 			try:
 				print(str(e))
@@ -317,7 +325,11 @@ except KeyboardInterrupt:
 			print("Error while trying to convert formats.\nYou probably don't have Calibre (https://github.com/kovidgoyal/calibre) installed.")
 			exit()
 		
-		print("-\nFinished converting. Exiting...")
+		lw("-\nFinished converting.")
+		print(f"Your file was converted into .{ext} format. Recommended actions:")
+		print(" - go into calibre and change title to actual series title")
+		print(" - go into calible and change synopsis")
+		print(" - enjoy.")
 
 	elif ext=="cf_disabled":
 		conversion_command = "ebook-convert " + '"' + filename + '"' + " " + '"' + name + '.'+'[mobi/epub/pdf/azw3]"'

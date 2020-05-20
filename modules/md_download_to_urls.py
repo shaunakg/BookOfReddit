@@ -1,6 +1,6 @@
 ## Downloads Markdown from a reddit page and parses links, saves to urls.md
 
-def get(url):
+def get(url, lw):
 	import http
 	import json
 	import requests
