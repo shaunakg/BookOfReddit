@@ -1,10 +1,18 @@
 
+# Ignore all folders (e.g __pycache__ and calibre conversion outputs)
 */*
+
+# Ignore nonessential file formats
 *.log
 *.txt
 *.opf
-*.env
+
+# Ignore config file
+config.env
+
+# Ignore output
 urls.md
+urls.txt
 
 !docs/*
 !old/*
