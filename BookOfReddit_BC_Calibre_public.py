@@ -278,10 +278,10 @@ try:
 
 except KeyboardInterrupt:
 	ebook_desc = "This is a Reddit compendium created by a program called BookOfReddit. The program is available at https://git.io/fA2dt and is licensed under GNU GPLv3 or later. Check last part of book for more information."
-	write_file.write("\n\n>>> End Compendium (with " + str(len(links)) + " posts), Metadata Below <<<\n")
+	write_file.write("\n\n##Compendium metadata\n")
 	write_file.write("List of books in format ([TITLE], by [AUTHOR] in [SUBREDDIT]):\n")
 	for submission in compendium:
-		write_file.write('> "' + submission.title+'", by u/' + submission.author.name + " in r/" + str(submission.subreddit)+"\n")
+		write_file.write('- "' + submission.title+'", by u/' + submission.author.name + " in r/" + str(submission.subreddit)+"\n")
 		# ebook_desc = ebook_desc + ", " + submission.title
 	write_file.close()
 	if ext in exts and ext != "cf_disabled": # Conversion and Metadata write code
