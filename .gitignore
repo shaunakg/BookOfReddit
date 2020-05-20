@@ -16,3 +16,10 @@ urls.txt
 
 !docs/*
 !old/*
+!modules/*
+!logs/README.md
+!outputs/README.md
+
+# Ignore pycache
+modules/__pycache__
+modules/__pycache__/*

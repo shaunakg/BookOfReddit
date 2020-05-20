@@ -20,36 +20,63 @@
 # https://github.com/kovidgoyal/calibre for more information.
 
 # COMMAND LINE USAGE
-# python bookofreddit.py (url) (file name without extension) (extension) [can download from web] 
+# python bookofreddit.py (url) (file name without extension) [extension] [can download from web] 
 
 import sys
+import datetime
+
+if len(sys.argv)==1:
+	lw("no command line options specified on startup")
+	print("Running BOR with user input. If you want to run automated, use the following command next time:")
+	print("python bookofreddit.py (url) (file name without extension) [extension]")
+
+logfile = open("logs/" + str(datetime.datetime.now().timestamp())+"-logfile.log","a+")
+
+logfile.write("\n\n^^^ THE ABOVE IS CONSOLE GENERATED OUTPUT ^^^\n\n")
+logfile.write(f"\n>>> Start BOR Logfile at {datetime.datetime.now()} <<<\n")
+
+def lw(writetext, printAlso=False):
+	logfile.write(f"[{str(datetime.datetime.now())}] {writetext}\n")
+	if printAlso:
+		print(writetext)
+	return(f"[{str(datetime.datetime.now())}] {writetext}\n")
 
 canDownloadFromWeb = True
 
 try:
-	ext = sys.argv[3]
+	ext = sys.argv[3].replace(".","")
+	lw("started with cmd extension argument " + sys.argv[3])
 except IndexError:
+	lw("no cmd extension. disabling conversion.")
 	ext = "cf_disabled"
 
 exts = ["pdf","azw3","epub","mobi","","cf_disabled"] # < Add more (TODO)
 
 if ext not in exts:
+	lw(f"{sys.argv[3]} wasn't a valid extension. disabling conversion.")
 	print(f"{ext} is not a valid extension. Disabling conversion.")
 	ext = "cf_disabled"
 
 from dotenv import load_dotenv
-load_dotenv(dotenv_path="config.env")
-
-import codecs
-import praw #Makes sure we can use the module
 
 try:
-	import md_download_to_urls
+	load_dotenv(dotenv_path="config.env")
+	lw("loaded environment file")
+except:
+	exit(lw("fatal: unable to load environment file. exiting."))
+
+import codecs
+import praw # Only use praw if we're using the web.
+
+try:
+	from modules import md_download_to_urls
+	lw("successfully imported URL download module.")
 except Exception as e:
+	lw("couldn't find URL download module, won't download from web.")
 	canDownloadFromWeb = False
-	print("!!! You need the file md_download_to_urls.py to enable the download of links from the web. Get it at: git.io/fA2dt (Note: BookOfReddit will still work, however it will only read from urls.md)\n")
+	print("!!! You need the file md_download_to_urls.py to enable the download of links from the web. Get it at: git.io/fA2dt (note: BOR will still work, it will just use urls.md/txt)\n")
 
-
+import subprocess
 import os
 
 exists = os.path.exists
@@ -96,8 +123,11 @@ reddit = praw.Reddit(client_id=os.getenv("reddit_client"),
                      client_secret=os.getenv("reddit_secret"),
                      user_agent=os.getenv("reddit_useragent"))
 
+lw("initialised praw")
+
 compendium = []
 link_list = []
+authors = []
 
 print(">>> Welcome to Book of Reddit (CONVERTER/DOWNLOADER EDITION) <<<")
 
@@ -106,25 +136,35 @@ if canDownloadFromWeb:
 
 		try:
 			url_to_get = sys.argv[1] 
+			lw("cmd argument for reddit url: " + sys.argv[1])
 		except IndexError:
+			lw("no cmd argument. querying using input()")
 			url_to_get = input("Enter a reddit URL to parse (or just <ENTER> to get existing urls.md): ")
+			lw(f"user entered {url_to_get}")
 		
 		if url_to_get == "":
+			lw("user did not enter a string.")
 			break
 		elif "http" in url_to_get:
+			lw("downloading urls...")
 			md_download_to_urls.get(url_to_get)
 			break
 		else:
+			lw("user did not enter a valid URL")
 			print("Enter a valid url (with \"http\") or press <ENTER>!")
 
 try:
 	name = sys.argv[2]
+	lw("cmd spec write filename is " + sys.argv[2])
 except IndexError:
+	lw("no filename specified in command line arguments, querying using input()")
 	name = input("Filename to save into (without extension): ")
+	lw("inputted filename: " + name)
 
 print("\n")
 print("(Use CTRL-C to exit or 'wipe' to wipe the file)")
-filename = name+".txt"
+filename = "outputs/" + name+".txt"
+lw("Full output path: " + filename)
 
 try:
 	write_file = codecs.open(filename,'w+',"utf-8")
@@ -133,22 +173,15 @@ try:
 	write_file.write(starttext)
 except FileNotFoundError:
 	print("Folder not found. BookOfReddit cannot create folders, please use a existing path.")
-	exit()
-
-logfile = open(filename+"-logfile.log","a+")
-logfile.write(">>> Start Logfile <<<\n")
-
-def lw(writetext):
-	logfile.write(writetext+"\n")
+	exit(lw("user entered a filename with folders in it. Oh no!"))
 
 if not exists("urls.md"):
 	if not exists("urls.txt"):
-		lw("Did not find urls.md or urls.txt, exiting now...")
 		print("To use this program, please put Markdown with urls in 'urls.md' or normal urls in 'urls.txt' (Or setup the downloader from the Github repo)")
-		exit(2)
+		exit(lw("Did not find urls.md or urls.txt, exiting now..."))
 
 import re
-lw("Imported re module to parse links")
+lw("Imported regex module to parse links")
 
 try:
 	url = codecs.open("urls.md","r+").read()
@@ -186,7 +219,8 @@ except:
 	if len(urls) < 2:
 		urls = urls[1].split(",")
 
-write_file.write("\n#Compendium by BookOfReddit (https://git.io/fA2dt), " + str(len(compendium)) + " posts included\n")
+write_file.write("\n#Compendium by BookOfReddit (https://git.io/fA2dt), " + str(len(urls)) + " posts included\n")
+write_file.write(f"[original url link]({url_to_get})\n\n")
 
 try:
 	links = urls
@@ -197,7 +231,7 @@ try:
 			submission = reddit.submission(url=link)
 		except Exception as e:
 			print(str(e))
-			lw("Exception while getting Reddit submission for " + link + ": " + str(e))
+			lw("[Exception] " + str(e))
 			# Error writing block
 			write_file.write("\n##" + submission.title + " (ERROR)\n")
 			write_file.write("[There was an error parsing the content at " + link + ".]")
@@ -205,8 +239,9 @@ try:
 			write_file.write("[Error information (submit this): " + str(e) + "]")
 		compendium.append(submission)
 		try:
+			authors.append(str(submission.author.name))
 			write_file.write("\n##" + submission.title.replace("[","(").replace("]",")") + "\n") # Added the '#' instead of normal '>>> ??? <<<' because then Calibre will detect it as a chapter.
-			write_file.write(submission.selftext) # .replace("‽", "?!") #
+			write_file.write(submission.selftext) # .replace("‽", "?!")
 			print("Processed: " + submission.title)
 			lw("Processed: " + submission.title)
 		except UnicodeEncodeError:
@@ -227,7 +262,7 @@ try:
 				write_file.write("[Please submit an error report at https://git.io/fAoaw.]")
 				write_file.write("[Error information (submit this): " + str(e) + "]")
 			except:
-				print(link + " : NOT A POST")
+				lw(link + " : NOT A POST")
 				compendium.remove(submission)
 				pass
 
@@ -242,37 +277,54 @@ except KeyboardInterrupt:
 		# ebook_desc = ebook_desc + ", " + submission.title
 	write_file.close()
 	if ext in exts and ext != "cf_disabled": # Conversion and Metadata write code
-		conversion_command = "ebook-convert " + '"' + filename + '"' + " " + '"' + name + '.'+ext+'"'
-		new_filename = name+"."+ext
-		os.system("echo off && cls")
+
+		lw("starting calibre conversion...")
+
+		#conversion_command = "ebook-convert " + '"' + filename + '"' + " " + '"outputs/' + name + '.'+ext+'"'
+		conversion_command = ["ebook-convert", filename, 'outputs/' + name + '.' +ext]
+		lw("autogenerated conversion command: " + ' '.join(conversion_command))
+
+		new_filename = "outputs/" + name + "." + ext
+		lw(f"conversion output will be written to {new_filename}")
+
 		print("--- converting to calibre please wait ---")
-		print('EXECUTING ' + conversion_command)
-		print("\nStarting CALIBRE ebook conversion service (if installed)\n---\n")
+		lw('EXECUTING ' + ' '.join(conversion_command), True)
+		print("Starting CALIBRE ebook conversion service (if installed)...")
 		errors = 0
-		if os.system(conversion_command) != 0: # Probably a better way of doing this
+		if subprocess.call(conversion_command, stdout=logfile) != 0: # Probably a better way of doing this
 			errors = errors+1
-		print("\nStarting CALIBRE ebook metadata write (if installed)\n---\n")
+		print("Starting CALIBRE ebook metadata write (if installed)...")
 		
 		# Metadata command assembly (That sounds complicated, but it is way more than just that)
-		metadata_write_command = 'ebook-meta ' + new_filename + ' -a "BookOfReddit'
+		lw("starting metadata write", True)
+		metadata_write_command = ["ebook-meta", new_filename, "-t", name, "-a", '&'.join(list(set(authors))), "-k", "BookOfReddit (https://git.io/fA2dt)", "-c", ebook_desc, "--to-opf", "outputs/" + name + "-metadata.opf"]
+		
 		# for i in compendium:
 		# 	metadata_write_command = metadata_write_command+i.author.name+'&'
-		metadata_write_command = metadata_write_command+'" -t "'+name+'" -p "BookOfReddit (https://git.io/fA2dt)" -c "' + ebook_desc
-		print('EXECUTING ' + metadata_write_command)
+		#metadata_write_command = metadata_write_command+'" -t "' + name  + '" -a "' + '&'.join(list(set(authors))) + ' " -k "BookOfReddit (https://git.io/fA2dt)" -c "' + ebook_desc + '" --to-opf "outputs/' + name + '-metadata.opf"'
+		
+		lw("autogenerated metadata write command: " + ' '.join(metadata_write_command))
+		print("Excecuting metadata write command (not shown because it's too large)")
 
-
-		if os.system(conversion_command) != 0: # Probably a better way of doing this
+		if subprocess.call(conversion_command, stdout=logfile) != 0: # Probably a better way of doing this
 			errors = errors+1
-		if os.system(metadata_write_command) != 0: # Probably a better way of doing this
+		if subprocess.call(metadata_write_command, stdout=logfile) != 0: # Probably a better way of doing this
 			errors = errors+1
 		errorcode = False if errors==0 else True
 
 		if errorcode:
+			lw("system error while trying to convert formats.")
 			print("Error while trying to convert formats.\nYou probably don't have Calibre (https://github.com/kovidgoyal/calibre) installed.")
 			exit()
-		print("\n-\nFinished converting. Exiting...")
+		
+		print("-\nFinished converting. Exiting...")
+
 	elif ext=="cf_disabled":
-		print("Cannot convert book, conversion functionality disabled.")
+		conversion_command = "ebook-convert " + '"' + filename + '"' + " " + '"' + name + '.'+'[mobi/epub/pdf/azw3]"'
+		lw("user chose to not convert book.")
+		lw("conversion command: " + ' '.join(conversion_command))
+		print("Cannot convert book, conversion functionality disabled. If you want to convert the book later, use the Calibre GUI or run:")
+		print(conversion_command)
 		print("Finished processing, thank you for using BookOfReddit.")
 	else:
 		conversion_command = "ebook-convert " + '"' + filename + '"' + " " + '"' + name + '.'+'[mobi/epub/pdf/azw3]"'
