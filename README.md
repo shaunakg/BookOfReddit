@@ -8,7 +8,7 @@ There are two ways to use BookOfReddit.
 - Run `python bookofreddit.py` (or whatever the filename is)  
   
 **Command-line arguments**
-- Run `python bookofreddit.py (url) (file name without extension) [extension]
+- Run `python bookofreddit.py (url) (file name without extension) [extension]`  
 Options with (round brackets) are **required** while options with \[square brackets\] are **optional**
 
 ## Information about different files
