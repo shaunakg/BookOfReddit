@@ -1,6 +1,16 @@
 # BookOfReddit
 Creates a compendium of Reddit posts, useful for long, series length WritingPrompts. (Originally created for r/HFY)
 
+## Usage instructions
+There are two ways to use BookOfReddit.  
+  
+**Manual**
+- Run `python bookofreddit.py` (or whatever the filename is)  
+  
+**Command-line arguments**
+- Run `python bookofreddit.py (url) (file name without extension) [extension]`  
+Options with (round brackets) are **required** while options with \[square brackets\] are **optional**
+
 ## Information about different files
 ### BookOfReddit_BC_Calibre_public.py
 - Bulk writes reddit post selftexts to a compendium (reading from urls.md or urls.txt)
