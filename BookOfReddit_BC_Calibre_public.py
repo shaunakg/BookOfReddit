@@ -25,7 +25,9 @@
 import sys
 import datetime
 
-logfile = open("logs/" + str(datetime.datetime.now().timestamp())+"-logfile.log","a+")
+start_mstime = str(datetime.datetime.now().timestamp())
+
+logfile = open("logs/" + start_mstime +"-logfile.log","a+")
 logfile.write(f"\n>>> Start BOR Logfile at {datetime.datetime.now()} <<<\n")
 
 def lw(writetext, printAlso=False):
@@ -65,6 +67,9 @@ except:
 
 import codecs
 import praw # Use praw
+import re
+
+lw("Imported codecs, praw, regex modules")
 
 try:
 	from modules import md_download_to_urls
@@ -77,6 +82,9 @@ except Exception as e:
 import subprocess
 import platform
 import os
+from time import sleep
+
+lw("imported subprocess, platform, os, time modules")
 exists = os.path.exists
 
 if os.name != 'nt':
@@ -138,11 +146,9 @@ if canDownloadFromWeb:
 			url_to_get = sys.argv[1] 
 			lw("cmd argument for reddit url: " + sys.argv[1])
 		except IndexError:
-
 			lw("no cmd argument. querying using input()")
 			url_to_get = input("Enter a reddit URL to parse (or just <ENTER> to get existing urls.md): ")
 			lw(f"user entered {url_to_get}")
-		
 		if url_to_get == "":
 
 			lw("user did not enter a string.")
@@ -166,13 +172,15 @@ except IndexError:
 	name = input("Filename to save into (without extension): ")
 	lw("inputted filename: " + name)
 
-print("(Use CTRL-C to exit or 'wipe' to wipe the file)")
+print("(Use CTRL-C to exit)")
 
 try:
 
 	# Makes folders so it's cleaner
-	os.makedirs(f"./outputs/{name}/")
-	name = f"{name}/{name}" # ew
+	folder_name = f"{name}-{start_mstime}"
+
+	os.makedirs(f"./outputs/{folder_name}/")
+	name = f"{folder_name}/{name}"
 
 	filename = "outputs/" + name+".md"
 	lw("Full output path: " + filename)
@@ -183,12 +191,13 @@ try:
 	write_file.write(starttext)
 
 except Exception as e:
-	exit(lw(f"An unknown exception occurred: {e}", True))
 
-import re
-lw("Imported regex module to parse links")
+	lw(f"An unknown exception occurred: {e}. Raising and exiting.")
+	raise e
+	exit()
 
 try:
+
 	url = codecs.open("urls.md","r+").read()
 
 	lw("Found file urls.md, parsing now")
@@ -247,8 +256,8 @@ try:
 			authors.append(str(submission.author.name))
 			write_file.write(("\n<h2 class=\"chapter\">" + submission.title.replace("[","(").replace("]",")")) + "</h2>\n") # Using semantic HTML to get Calibre to recognise it.
 			write_file.write(submission.selftext) # .replace("‽", "?!")
-			print("Processed: " + submission.title)
-			lw("Processed: " + submission.title)
+			print(f"[Processed #{links.index(link)}] {submission.title}")
+			lw(f"[Processed #{links.index(link)}] {submission.title}")
 		except UnicodeEncodeError:
 
 			print(lw("UnicodeEncodeError on " + str(submission.title) + ", at: " + link))
@@ -280,7 +289,7 @@ except KeyboardInterrupt:
 	write_file.write("List of posts compiled:\n")
 	write_file.write("\n<ol>\n")
 	for submission in compendium:
-		write_file.write(f"<li>*[{submission.title}](https://reddit.com{submission.permalink})* by u/{submission.author.name} in r/{submission.subreddit.name}</li>")
+		write_file.write(f'<li><a href="https://reddit.com{submission.permalink}">{submission.title}</a> by u/{submission.author.name} in r/{submission.subreddit.name}</li>')
 	write_file.write("</ol>\n")
 	write_file.close()
 	if ext in exts and ext != "cf_disabled": # Conversion and Metadata write code

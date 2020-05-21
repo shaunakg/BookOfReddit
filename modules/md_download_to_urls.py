@@ -17,7 +17,18 @@ def get(url, lw):
 		url = url[:-1]
 	actual_url = url + ".json"
 	lw("Starting network connection to: " + actual_url)
-	response = requests.get(actual_url, headers=headers).json()
+
+	try:
+		response = requests.get(actual_url, headers=headers).json()
+	except json.decoder.JSONDecodeError as jde:
+		lw("JSON decode error! Most likely cause: reddit servers down OR url parse error. ")
+		lw(jde)
+		return exit(f"Unable to connect to {actual_url} at this time. Does the URL look right? Otherwise, this might be a reddit server issue.")
+	except Exception as e:
+		lw(f"Other, non JDE exception.")
+		lw(e)
+		return exit(f"Unable to connect to the internet at this time.")
+
 	lw("Got data from specified url! Parsing data as text...")
 
 	try:
