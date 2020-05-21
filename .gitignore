@@ -17,6 +17,7 @@ urls.txt
 !docs/*
 !old/*
 !modules/*
+!covers/*
 !logs/README.md
 !outputs/README.md
 
