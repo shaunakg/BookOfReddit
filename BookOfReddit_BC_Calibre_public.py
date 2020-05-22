@@ -43,27 +43,6 @@ if len(sys.argv)==1:
 
 canDownloadFromWeb = True
 
-try:
-	ext = sys.argv[3].replace(".","")
-	lw("started with cmd extension argument " + sys.argv[3])
-except IndexError:
-	lw("no cmd extension. disabling conversion.")
-	ext = "cf_disabled"
-
-exts = ["pdf",
-	"azw3",
-	"epub",
-	"mobi",
-	"html",
-	"",
-	"cf_disabled"
-] # < Add more (TODO)
-
-if ext not in exts:
-	lw(f"{ext} wasn't a valid extension. disabling conversion.")
-	print(f"{ext} is not a valid extension. Disabling conversion.")
-	ext = "cf_disabled"
-
 from dotenv import load_dotenv
 
 try:
@@ -180,7 +159,35 @@ except IndexError:
 	name = input("Filename to save into (without extension): ")
 	lw("inputted filename: " + name)
 
-print("(Use CTRL-C to exit)")
+exts = ["pdf",
+	"azw3",
+	"epub",
+	"mobi",
+	"html",
+	"",
+	"cf_disabled"
+] # < Add more (TODO)
+
+try:
+	ext = sys.argv[3].replace(".","")
+	lw("started with cmd extension argument " + sys.argv[3])
+except IndexError:
+	lw("no cmd extension. asking user...")
+	ext = input("Enter a file extension for conversion (or leave blank) [azw3/epub/mobi/html]: ")
+	while ext not in exts:
+		lw(f"user entered {ext} which isn't valid")
+		ext = input("Invalid input. Enter a file extension for conversion (or leave blank) [azw3/epub/mobi/html]:")
+	lw(f"got final user input extension > {ext}")
+
+if ext == "":
+	ext = "cf_disabled"
+
+if ext not in exts:
+	lw(f"{ext} wasn't a valid extension. disabling conversion.")
+	print(f"{ext} is not a valid extension. Disabling conversion.")
+	ext = "cf_disabled"
+
+print("\n- starting automated process (use CTRL-C to exit) -\n")
 
 try:
 
@@ -311,8 +318,8 @@ except KeyboardInterrupt:
 		new_filename = "outputs/" + name + "." + ext
 		lw(f"conversion output will be written to {new_filename}")
 
-		print("--- converting to calibre please wait ---")
-		lw('EXECUTING ' + ' '.join(conversion_command), True)
+		print("\n- converting to calibre please wait -\n")
+		lw(f"Executing {conversion_command}", True)
 		print("Starting CALIBRE ebook conversion service (if installed)...")
 		errors = 0
 		if subprocess.call(conversion_command, stdout=logfile) != 0: # Probably a better way of doing this
@@ -366,6 +373,7 @@ except KeyboardInterrupt:
 		print(f"Your file was converted into .{ext} format. Recommended actions:")
 		print(" - go into calibre and change title to actual series title")
 		print(" - go into calible and change synopsis")
+		print(" - go into calibre and generate a cover")
 		print(" - enjoy.")
 
 	elif ext=="cf_disabled":
