@@ -3,7 +3,7 @@ Creates a compendium of Reddit posts, useful for long, series length WritingProm
 
 ## Prerequisites
 - Python module: [`praw`](https://praw.readthedocs.io/en/latest/) - install using `pip install praw`
-- Reddit authentication: go to [reddit apps](https://reddit.com/pref/apps) and make your own. Put the key, secret and a user agent in config.env.
+- Reddit authentication: go to [reddit apps](https://reddit.com/prefs/apps) and make your own. Put the key, secret and a user agent in config.env.
 
 ## Usage instructions
 There are two ways to use BookOfReddit.  
