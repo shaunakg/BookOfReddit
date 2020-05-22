@@ -23,11 +23,12 @@ def get(url, lw):
 	except json.decoder.JSONDecodeError as jde:
 		lw("JSON decode error! Most likely cause: reddit servers down OR url parse error. ")
 		lw(jde)
-		return exit(f"Unable to connect to {actual_url} at this time. Does the URL look right? Otherwise, this might be a reddit server issue.")
+		print("Sorry, {actual_url} doesn't seem to be parseable.")
+		return jde
 	except Exception as e:
 		lw(f"Other, non JDE exception.")
 		lw(e)
-		return exit(f"Unable to connect to the internet at this time.")
+		return e
 
 	lw("Got data from specified url! Parsing data as text...")
 
@@ -43,6 +44,8 @@ def get(url, lw):
 
 	write_file.write(content_md)
 	write_file.close()
+
+	return 0
 
 if __name__ == '__main__':
 	get(input("Url: "))
