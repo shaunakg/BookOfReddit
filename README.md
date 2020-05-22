@@ -1,6 +1,9 @@
 # BookOfReddit
 Creates a compendium of Reddit posts, useful for long, series length WritingPrompts. (Originally created for r/HFY)
 
+## Prerequisites
+- [`praw`](https://praw.readthedocs.io/en/latest/) - install using `pip install praw`
+
 ## Usage instructions
 There are two ways to use BookOfReddit.  
   
