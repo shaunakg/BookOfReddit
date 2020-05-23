@@ -2,7 +2,8 @@
 Creates a compendium of Reddit posts, useful for long, series length WritingPrompts. (Originally created for r/HFY)
 
 ## Prerequisites
-- [`praw`](https://praw.readthedocs.io/en/latest/) - install using `pip install praw`
+- Python module: [`praw`](https://praw.readthedocs.io/en/latest/) - install using `pip install praw`
+- Reddit authentication: go to [reddit apps](https://reddit.com/prefs/apps) and make your own. Put the key, secret and a user agent in config.env.
 
 ## Usage instructions
 There are two ways to use BookOfReddit.  
@@ -15,7 +16,7 @@ There are two ways to use BookOfReddit.
 Options with (round brackets) are **required** while options with \[square brackets\] are **optional**
 
 ## Information about different files
-### BookOfReddit_BC_Calibre_public.py
+### BookOfReddit.py
 - Bulk writes reddit post selftexts to a compendium (reading from urls.md or urls.txt)
 - **NEW: Gives the option to download and extract URLs from Reddit posts! Extremely useful for wiki pages or index pages (example: [this](https://www.reddit.com/r/HFY/wiki/ref/universes/jenkinsverse/chronological_reading_order) or [this](https://www.reddit.com/r/Selben/comments/60r5ps/timeline_for_tfts_stories/))**
 - **Uses UTF-8 formatting** (This file is recommended to all users)
