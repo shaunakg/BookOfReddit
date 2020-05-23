@@ -12,55 +12,49 @@
 # ├───	(I can't take credit for this, it uses Calibre by
 # └───	Kovid Goyal which is a awesome tool that I did not create)
 
-# All of the BookOfReddit code by @shaunakg/The_Removed is
-# copyright (c) 2018 @shaunakg/The_Removed under the GNU GPLv3 License.
+# All of the BookOfReddit code by @shaunakg is
+# copyright (c) @shaunakg under the GNU GPLv3 License.
 
 # All of the parts of this program using Calibre and Kovid Goyal's work 
-# are copyright (c) 2018 Kovid Goyal. Check the license for Calibre at
+# are copyright (c) Kovid Goyal. Check the license for Calibre at
 # https://github.com/kovidgoyal/calibre for more information.
 
 # COMMAND LINE USAGE
 # python bookofreddit.py (url) (file name without extension) [extension] [can download from web] 
 
-import sys
-import datetime
-
 __developer__ = "@shaunakg"
 __version__ = "0.4.3"
 
+# Start logging before everything
+import datetime
 start_mstime = str(datetime.datetime.now().timestamp())
-
-logfile = open("logs/" + start_mstime +"-logfile.log","a+")
+logfilename = "logs/" + start_mstime +"-logfile.log"
+logfile = open(logfilename,"a+")
 logfile.write(f"\n>>> Start BOR Logfile at {datetime.datetime.now()} <<<\n")
-
 def lw(writetext, printAlso=False):
 	logfile.write(f"[{str(datetime.datetime.now())}] {writetext}\n")
 	if printAlso:
 		print(writetext)
 	return(f"[{str(datetime.datetime.now())}] {writetext}\n")
 
-if len(sys.argv)==1:
-	lw("no command line options specified on startup")
-	print("\nRunning BOR with user input. If you want to run automated, use the following command next time:")
-	print("$ python bookofreddit.py (url) (file name without extension) [extension]\n")
-
-canDownloadFromWeb = True
+# Import useful modules
+import sys
+import codecs
+import praw # Use praw
+import re
+import subprocess
+import platform
+import os
+from random import randint
 
 from dotenv import load_dotenv
-
 try:
 	load_dotenv(dotenv_path="config.env")
 	lw("loaded environment file")
 except:
 	exit(lw("fatal: unable to load environment file. exiting."))
 
-import codecs
-import praw # Use praw
-import re
-from random import randint
-
-lw("Imported codecs, praw, regex, random modules")
-
+canDownloadFromWeb = True
 try:
 	from modules import md_download_to_urls
 	lw("successfully imported URL download module.")
@@ -68,14 +62,21 @@ except Exception as e:
 	lw("couldn't find URL download module, won't download from web.")
 	canDownloadFromWeb = False
 	print("!!! You need the file md_download_to_urls.py to enable the download of links from the web. Get it at: git.io/fA2dt (note: BOR will still work, it will just use urls.md/txt)\n")
-
-import subprocess
-import platform
-import os
-from time import sleep
-
-lw("imported subprocess, platform, os, time modules")
 exists = os.path.exists
+
+# setup rich text
+from rich.console import Console
+from rich.markdown import Markdown
+from rich.progress import track
+console = Console()
+
+def print_markdown(t):
+	console.print(Markdown(t))
+
+if len(sys.argv)==1:
+	lw("no command line options specified on startup")
+	print("\nRunning BOR with user input. If you want to run automated, use the following command next time:")
+	print("$ python bookofreddit.py (url) (file name without extension) [extension]\n")
 
 if os.name != 'nt':
 	lw(f"User is running {platform.platform()}, not Windows/NT.")
@@ -127,7 +128,8 @@ compendium = []
 link_list = []
 authors = []
 
-print(">>> Welcome to Book of Reddit (CONVERTER/DOWNLOADER EDITION) <<<")
+print_markdown(f"# BookOfReddit version {__version__} by {__developer__}")
+print_markdown(f"saving log for this run to **{logfilename}**")
 
 if canDownloadFromWeb:
 	while True:
@@ -139,17 +141,14 @@ if canDownloadFromWeb:
 			lw("no cmd argument. querying using input()")
 			url_to_get = input("Enter a reddit URL to parse (or just <ENTER> to get existing urls.md): ")
 			lw(f"user entered {url_to_get}")
-		if url_to_get == "":
 
+		if url_to_get == "":
 			lw("user did not enter a string.")
 			break
-
 		elif "http" in url_to_get:
-
 			lw("downloading urls...")
 			md_download_to_urls.get(url_to_get, lw)
 			break
-
 		else:
 			lw("user did not enter a valid URL")
 			print("Enter a valid url (with \"http\") or press <ENTER>!")
@@ -256,14 +255,12 @@ write_file.write(f"[original url link]({url_to_get})\n[ebook generation feedback
 
 try:
 	links = urls
-	for link in links:
+	for link in track(links, description = "Downloading..."):
 		link_list.append(link)
-
 		try:
 			submission = reddit.submission(url=link)
 		except praw.exceptions.InvalidURL as e:
 			lw(f"PRAW InvalidURL Exception: {e}")
-			print(f"Not processing or writing {link} due to invalid URL.")
 			pass
 		except Exception as e:
 			print(str(e))
@@ -281,12 +278,11 @@ try:
 			authors.append(str(submission.author.name))
 			write_file.write(("\n<h2 class=\"chapter\">" + submission.title.replace("[","(").replace("]",")")) + "</h2>\n") # Using semantic HTML to get Calibre to recognise it.
 			write_file.write(submission.selftext) # .replace("‽", "?!")
-			print(f"[Processed #{links.index(link)}] {submission.title}")
 			lw(f"[Processed #{links.index(link)}] {submission.title}")
 
 		except UnicodeEncodeError:
 
-			print(lw("UnicodeEncodeError on " + str(submission.title) + ", at: " + link))
+			lw("UnicodeEncodeError on " + str(submission.title) + ", at: " + link)
 			# Error writing block
 			write_file.write(("\n<h2 class=\"chapter\">(error) " + submission.title.replace("[","(").replace("]",")")) + "</h2>\n") # Using semantic HTML to get Calibre to recognise it.
 			write_file.write("[There was an error parsing the content at " + link + ".]")
@@ -295,7 +291,6 @@ try:
 
 		except Exception as e:
 			try:
-				print(str(e))
 				lw("Exception while writing " + link + " to file: " + str(e))
 				# Error writing block
 				write_file.write("\n>>> " + submission.title + " (ERROR) <<<\n")
@@ -322,33 +317,23 @@ except KeyboardInterrupt:
 
 		lw("starting calibre conversion...")
 
-		#conversion_command = "ebook-convert " + '"' + filename + '"' + " " + '"outputs/' + name + '.'+ext+'"'
-		conversion_command = ["ebook-convert", filename, 'outputs/' + name + '.' +ext, "--input-encoding", "utf-8", "--mobi-file-type", "new", "--asciiize"]
-		lw("autogenerated conversion command: " + ' '.join(conversion_command))
-
+		# conversion command assembly
 		new_filename = "outputs/" + name + "." + ext
+		conversion_command = ["ebook-convert", filename, new_filename, "--input-encoding", "utf-8", "--asciiize"]
+
+		if ext=="mobi":
+			conversion_command.append("--mobi-file-type")
+			conversion_command.append("new")
+
+		lw("autogenerated conversion command: " + ' '.join(conversion_command))
 		lw(f"conversion output will be written to {new_filename}")
 
-		print("\n- converting to calibre please wait -\n")
-		lw(f"Executing {conversion_command}", True)
-		print("Starting CALIBRE ebook conversion service (if installed)...")
-		errors = 0
-		if subprocess.call(conversion_command, stdout=logfile) != 0: # Probably a better way of doing this
-			errors = errors+1
-		print("Starting CALIBRE ebook metadata write (if installed)...")
-
-		# Use random cover. Doesn't seem to work at the moment but as far as I can tell that's a Calibre problem.
-		
-		# Metadata command assembly (That sounds complicated, but it is way more than just that)
-		lw("starting metadata write", True)
+		# metadata command assembly
+		lw("generating metadata command")
 		metadata_write_command = ["ebook-meta", new_filename, "-t", name, "-a", '&'.join(list(set(authors))), "-k", "BookOfReddit (https://git.io/fA2dt)", "--publisher", "BookOfReddit (https://git.io/fA2dt)", "-c", ebook_desc, "--to-opf", "outputs/" + name + "-metadata.opf"]
+		lw(f"generated metadata command: {metadata_write_command}")
 
-		lw("autogenerated metadata write command: " + ' '.join(metadata_write_command))
-		print("Excecuting metadata write command (not shown because it's too large)")
-
-		if subprocess.call(metadata_write_command, stdout=logfile) != 0:
-			errors = errors + 1
-
+		# Ebook polishing command assembly
 		covers = [
 			"covers/light/1.jpg",
 			"covers/light/2.jpg",
@@ -360,28 +345,30 @@ except KeyboardInterrupt:
 			"covers/dark/4.jpg",
 			"covers/dark/5.jpg",
 		]
-
 		coverfile = covers[randint(0,8)]
 		cover_write_command = ["ebook-polish", new_filename, "--cover", coverfile]
 
-		lw(f"Executing cover overwrite command: {cover_write_command}", True)
-		if subprocess.call(cover_write_command, stdout=logfile) != 0:
-			errors = errors + 1
-		
-		lw("Removing non-polished book.")
-		os.remove(new_filename)
-		lw("Renaming to normal book.")
-		os.rename(new_filename.replace(f".{ext}","") + f"_polished.{ext}", new_filename)
+		# Excecuting commands
+		errors = 0
+		for command in track([conversion_command, metadata_write_command, cover_write_command], description = "Converting..."):
+			lw(f"Excecuting {command}")
+			if subprocess.call(command, stdout=logfile):
+				lw("Error!!")
+				error = errors + 1
 
 		errorcode = False if errors==0 else True
-
 		if errorcode:
 			lw("system error while trying to convert formats.")
 			print("Error while trying to convert formats.\nYou probably don't have Calibre (https://github.com/kovidgoyal/calibre) installed.")
 			exit()
 		
+		lw("Removing non-polished book.")
+		os.remove(new_filename)
+		lw("Renaming to normal book.")
+		os.rename(new_filename.replace(f".{ext}","") + f"_polished.{ext}", new_filename)
+		
 		lw("-\nFinished converting.\n")
-		print(f"Your file was converted into .{ext} format. Recommended actions:")
+		print(f"Your file was downloaded and converted into .{ext} format. Recommended actions:")
 		print(" - go into calibre and change title to actual series title")
 		print(" - go into calible and change synopsis")
 		print(" - go into calibre and generate a cover")
@@ -402,6 +389,7 @@ except KeyboardInterrupt:
 		print("\n\nYou didn't put an extension to convert into. BookOfReddit will not automatically convert your file, however, if you have Calibre ebook manager (https://calibre-ebook.com) installed, you can run:\n")
 		print(conversion_command)
 		print("\nto convert your book into the format of your choice.\n")
-		print("\nFinished processing, thank you for using BookOfReddit.")
+		print("\nFinished processing, thank you for using BookOfReddit.\n\n")
+		logfile.close()
 		exit()
 
