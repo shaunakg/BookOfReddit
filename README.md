@@ -2,7 +2,7 @@
 Creates a compendium of Reddit posts, useful for long, series length WritingPrompts. (Originally created for r/HFY)
 
 ## Prerequisites
-- Python module: [`praw`](https://praw.readthedocs.io/en/latest/) - install using `pip install praw`
+- Required python modules, run `pip install -r requirements.txt` or `install.cmd`/`install.sh`.
 - Reddit authentication: go to [reddit apps](https://reddit.com/prefs/apps) and make your own. Put the key, secret and a user agent in config.env.
 
 ## Usage instructions
